@@ -4,7 +4,7 @@
 
 
 #define TAM 20
-#define MAR ' '
+#define MAR '*'
 
 char tabuleiro[TAM][TAM];
 
@@ -18,24 +18,17 @@ void gerar_tabuleiro()
 
 void mostra_tabuleiro(char tabuleiro[TAM][TAM]) 
 {
+
+    printf("    A B C D E F G H I J K L M N O P Q R S T \n\n");
+
     for (int i = 0; i < TAM; i++)
     {
-        for (int j = 0; j < TAM; j++) printf("%c ", tabuleiro[i][j]);
+        printf("%2d  ", i);
+        for (int j = 0; j < TAM; j++) printf("%c ",tabuleiro[i][j]);
         printf("\n");
     }
+    
 }
-
-/*
-int verifica_tabuleiro(char tabuleiro[TAM][TAM], int x, int y, char id) 
-{
-    for (int i = 0; i < TAM; i++)
-    {
-        for (int j = 0; j < TAM; j++){
-            
-        }
-    }
-}
-*/
 
 void inicializa_boia(char tabuleiro[TAM][TAM])
 {
@@ -393,7 +386,7 @@ void conta_pecas_tabuleiro(char tabuleiro[TAM][TAM])
         }
     }
 
-    printf("\n---------------------------------\n");
+    printf("\n--------------------------------------------\n");
     printf("Boias: %d \n", boia);
     printf("Aviao: %d \n", aviao);
     printf("Submarino: %d \n", submarino);
