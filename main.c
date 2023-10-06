@@ -1,10 +1,13 @@
 #include<stdio.h>
-#include <stdlib.h>
-#include <time.h>
+#include<stdlib.h>
+#include<time.h>
+#include<conio.h>
+
+#include "ANSI-color.h"
 
 
 #define TAM 20
-#define MAR '*'
+#define MAR '.'
 
 char tabuleiro[TAM][TAM];
 
@@ -24,8 +27,35 @@ void mostra_tabuleiro(char tabuleiro[TAM][TAM])
     for (int i = 0; i < TAM; i++)
     {
         printf("%2d  ", i);
-        for (int j = 0; j < TAM; j++) printf("%c ",tabuleiro[i][j]);
-        printf("\n");
+        for (int j = 0; j < TAM; j++) 
+        {
+            //printf("%c ",tabuleiro[i][j]);
+
+            if (tabuleiro[i][j] == '0')
+            { 
+                printf(RED "%c ",tabuleiro[i][j]);
+            } else if (tabuleiro[i][j] == '1')
+            {
+                printf(BYEL "%c ",tabuleiro[i][j]);
+            } else if (tabuleiro[i][j] == '2')
+            {
+                printf(BMAG "%c ",tabuleiro[i][j]);
+            } else if (tabuleiro[i][j] == '3')
+            {
+                printf(BGRN "%c ",tabuleiro[i][j]);
+            } else if (tabuleiro[i][j] == '4')
+            {
+                printf(BCYN "%c ",tabuleiro[i][j]);
+            } else if (tabuleiro[i][j] == '5')
+            {
+                printf(BRED "%c ",tabuleiro[i][j]);
+            } else if (tabuleiro[i][j] == MAR)
+            {
+                printf(BLU "%c " reset,tabuleiro[i][j]);
+            }
+            
+        }
+        printf("\n" reset);
     }
     
 }
