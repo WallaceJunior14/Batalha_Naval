@@ -1,17 +1,13 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<time.h>
-#include<conio.h>
-
-#include "ANSI-color.h"
-
 
 #define TAM 20
 #define MAR '.'
 
-char tabuleiro[TAM][TAM];
+char tab_inimigo[TAM][TAM];
 
-void gerar_tabuleiro()
+void gerar_tabuleiro(char tabuleiro[][TAM])
 {
     for (int i = 0; i < TAM; i++)
     {
@@ -21,60 +17,40 @@ void gerar_tabuleiro()
 
 void mostra_tabuleiro(char tabuleiro[TAM][TAM]) 
 {
-
-    printf("    A B C D E F G H I J K L M N O P Q R S T \n\n");
+    for (int i=0; i<1; i++) 
+    {
+        printf("   ");
+        for (int j = 0; j < TAM; j++) printf("%2d ", j);
+        printf("\n\n");
+    }   
 
     for (int i = 0; i < TAM; i++)
     {
-        printf("%2d  ", i);
+        printf("%2d ", i);
         for (int j = 0; j < TAM; j++) 
         {
-            //printf("%c ",tabuleiro[i][j]);
-
-            if (tabuleiro[i][j] == '0')
-            { 
-                printf(RED "%c ",tabuleiro[i][j]);
-            } else if (tabuleiro[i][j] == '1')
-            {
-                printf(BYEL "%c ",tabuleiro[i][j]);
-            } else if (tabuleiro[i][j] == '2')
-            {
-                printf(BMAG "%c ",tabuleiro[i][j]);
-            } else if (tabuleiro[i][j] == '3')
-            {
-                printf(BGRN "%c ",tabuleiro[i][j]);
-            } else if (tabuleiro[i][j] == '4')
-            {
-                printf(BCYN "%c ",tabuleiro[i][j]);
-            } else if (tabuleiro[i][j] == '5')
-            {
-                printf(BRED "%c ",tabuleiro[i][j]);
-            } else if (tabuleiro[i][j] == MAR)
-            {
-                printf(BLU "%c " reset,tabuleiro[i][j]);
-            }
-            
+            printf("%2c ",tabuleiro[i][j]);
         }
-        printf("\n" reset);
+        printf("\n");
     }
     
 }
 
-void inicializa_boia(char tabuleiro[TAM][TAM])
+void inicializa_boia(char tabuleiro[TAM][TAM], int quantidade)
 {
-    int x, y, quantidade;
+    int x, y;
     char id;
     
     srand(time(NULL));
-    quantidade = 10;
     id = '0';
 
     while (quantidade != 0)
     {
-        x = rand() % 19;
-        y = rand() % 19;
+        x = rand() % TAM;
+        y = rand() % TAM;
 
-        if ((x>=0 && x<=19) && (y>=0 && y<= 19))
+        //VERIFICA LIMITES
+        if ((x>=0 && x<=(TAM-1)) && (y>=0 && y<= (TAM-1)))
         {
             if (tabuleiro[x][y] == MAR) 
             {
@@ -86,23 +62,22 @@ void inicializa_boia(char tabuleiro[TAM][TAM])
     }
 }
 
-void inicializa_aviao(char tabuleiro[TAM][TAM])
+void inicializa_aviao(char tabuleiro[TAM][TAM], int quantidade)
 {
-    int x, y, quantidade, direcao;
+    int x, y, direcao;
     char id;
 
     srand(time(NULL));
-    quantidade = 5;
     id = '1';
 
     while (quantidade != 0)
     {
-        x = rand() % 19;
-        y = rand() % 19;
+        x = rand() % TAM;
+        y = rand() % TAM;
         direcao = 1 + rand() % 4;
 
         //Limites
-        if((x>=0 && x<=19) && (y>=0 && y-1>=0 && y+1<=19))
+        if((x>=0 && x<=(TAM-1)) && (y>=0 && y-1>=0 && y+1<=(TAM-1)))
         {
             //Direcao do posicionamento: Norte
             if (direcao == 1)
@@ -143,23 +118,22 @@ void inicializa_aviao(char tabuleiro[TAM][TAM])
     
 }
 
-void inicializa_submarino(char tabuleiro[TAM][TAM])
+void inicializa_submarino(char tabuleiro[TAM][TAM], int quantidade)
 {
-    int x, y, quantidade, direcao;
+    int x, y, direcao;
     char id;
 
     srand(time(NULL));
-    quantidade = 5;
     id = '2';
 
     while (quantidade != 0)
     {
-        x = rand() % 19;
-        y = rand() % 19;
+        x = rand() % TAM;
+        y = rand() % TAM;
         direcao = 1 + rand() % 4;
 
         //Limites
-        if((x>=0 && x-3>=0 && x+3>=19 && x<=19) && (y>=0 && y-3>=0 && y+3<=19))
+        if((x>=0 && x-3>=0 && x+3>=(TAM-1) && x<=(TAM-1)) && (y>=0 && y-3>=0 && y+3<=(TAM-1)))
         {
             //Direcao do posicionamento: Norte
             if (direcao == 1)
@@ -200,23 +174,22 @@ void inicializa_submarino(char tabuleiro[TAM][TAM])
     
 }
 
-void inicializa_espiao1(char tabuleiro[TAM][TAM])
+void inicializa_espiao1(char tabuleiro[TAM][TAM], int quantidade)
 {
-    int x, y, quantidade, direcao;
+    int x, y, direcao;
     char id;
 
     srand(time(NULL));
-    quantidade = 4;
     id = '3';
 
     while (quantidade != 0)
     {
-        x = rand() % 19;
-        y = rand() % 19;
+        x = rand() % TAM;
+        y = rand() % TAM;
         direcao = 1 + rand() % 4;
 
         //Limites
-        if((x>=0 && x-3>=0 && x+3<=19) && (y>=0 && y-3>=0 && y+3<=19))
+        if((x>=0 && x-3>=0 && x+3<=(TAM-1)) && (y>=0 && y-3>=0 && y+3<=(TAM-1)))
         {
             //Direcao do posicionamento: Norte
             if (direcao == 1)
@@ -265,23 +238,22 @@ void inicializa_espiao1(char tabuleiro[TAM][TAM])
     
 }
 
-void inicializa_espiao2(char tabuleiro[TAM][TAM])
+void inicializa_espiao2(char tabuleiro[TAM][TAM], int quantidade)
 {
-    int x, y, quantidade, direcao;
+    int x, y, direcao;
     char id;
 
     srand(time(NULL));
-    quantidade = 4;
     id = '4';
 
     while (quantidade != 0)
     {
-        x = rand() % 19;
-        y = rand() % 19;
+        x = rand() % TAM;
+        y = rand() % TAM;
         direcao = 1 + rand() % 4;
 
         //Limites
-        if((x>=0 && x-3>=0 && x+3<=19) && (y>=0 && y-3>=0 && y+3<=19))
+        if((x>=0 && x-3>=0 && x+3<=(TAM-1)) && (y>=0 && y-3>=0 && y+3<=(TAM-1)))
         {
             //Direcao do posicionamento: Norte
             if (direcao == 1)
@@ -329,23 +301,22 @@ void inicializa_espiao2(char tabuleiro[TAM][TAM])
     }
 }
 
-void inicializa_porta_avioes(char tabuleiro[TAM][TAM])
+void inicializa_porta_avioes(char tabuleiro[TAM][TAM], int quantidade)
 {
-    int x, y, quantidade, direcao;
+    int x, y, direcao;
     char id;
 
     srand(time(NULL));
-    quantidade = 2;
     id = '5';
 
     while (quantidade != 0)
     {
-        x = rand() % 19;
-        y = rand() % 19;
+        x = rand() % TAM;
+        y = rand() % TAM;
         direcao = 1 + rand() % 4;
 
         //Limites
-        if((x>=0 && (x-1>=0 && x+1<=19) && (x-4>=0 && x+4<=19)) && (y>=0 && (y-1>=0 && y+1<=19) && (y-4>=0 && y+4<=19)))
+        if((x>=0 && (x-1>=0 && x+1<=(TAM-1)) && (x-4>=0 && x+4<=(TAM-1))) && (y>=0 && (y-1>=0 && y+1<=(TAM-1)) && (y-4>=0 && y+4<=(TAM-1))))
         {
             //Direcao do posicionamento: Norte
             if (direcao == 1)
@@ -428,18 +399,18 @@ void conta_pecas_tabuleiro(char tabuleiro[TAM][TAM])
 int main()
 {
     srand(time(NULL));
-    gerar_tabuleiro();
+    gerar_tabuleiro(tab_inimigo);
 
-    inicializa_boia(tabuleiro);
-    inicializa_aviao(tabuleiro);
-    inicializa_submarino(tabuleiro);
-    inicializa_espiao1(tabuleiro);
-    inicializa_espiao2(tabuleiro);
-    inicializa_porta_avioes(tabuleiro);
+    inicializa_boia(tab_inimigo, 10);
+    inicializa_aviao(tab_inimigo, 5);
+    inicializa_submarino(tab_inimigo, 5);
+    inicializa_espiao1(tab_inimigo, 4);
+    inicializa_espiao2(tab_inimigo, 4);
+    inicializa_porta_avioes(tab_inimigo, 2);
 
-    mostra_tabuleiro(tabuleiro);    
+    mostra_tabuleiro(tab_inimigo);    
 
-    conta_pecas_tabuleiro(tabuleiro);
+    conta_pecas_tabuleiro(tab_inimigo);
     
     return 0; 
 }
