@@ -15,7 +15,7 @@ void gerar_tabuleiro(char tabuleiro[][TAM])
     }
 }
 
-void mostra_tabuleiro(char tabuleiro[TAM][TAM]) 
+void mostra_tabuleiro(char tabuleiro[][TAM]) 
 {
     for (int i=0; i<1; i++) 
     {
@@ -27,7 +27,7 @@ void mostra_tabuleiro(char tabuleiro[TAM][TAM])
     for (int i = 0; i < TAM; i++)
     {
         printf("%2d ", i);
-        for (int j = 0; j < TAM; j++) 
+        for (int j = 0; j < TAM; j++)
         {
             printf("%2c ",tabuleiro[i][j]);
         }
@@ -36,18 +36,16 @@ void mostra_tabuleiro(char tabuleiro[TAM][TAM])
     
 }
 
-void inicializa_boia(char tabuleiro[TAM][TAM], int quantidade)
-{
-    int x, y;
-    char id;
+void posiciona_boia(char tabuleiro[][TAM], int quantidade, int x, int y)
+{  
+    char id = '0';
     
     srand(time(NULL));
-    id = '0';
 
     while (quantidade != 0)
     {
-        x = rand() % TAM;
-        y = rand() % TAM;
+        x = x>=0 ? x : rand() % TAM;
+        y = y>=0 ? y : rand() % TAM;
 
         //VERIFICA LIMITES
         if ((x>=0 && x<=(TAM-1)) && (y>=0 && y<= (TAM-1)))
@@ -55,6 +53,7 @@ void inicializa_boia(char tabuleiro[TAM][TAM], int quantidade)
             if (tabuleiro[x][y] == MAR) 
             {
                 tabuleiro[x][y] = id;
+                x = y = -1;
             } else continue;
         } else continue;
         
@@ -62,13 +61,12 @@ void inicializa_boia(char tabuleiro[TAM][TAM], int quantidade)
     }
 }
 
-void inicializa_aviao(char tabuleiro[TAM][TAM], int quantidade)
+void posiciona_aviao(char tabuleiro[][TAM], int quantidade)
 {
     int x, y, direcao;
-    char id;
+    char id = '1';
 
     srand(time(NULL));
-    id = '1';
 
     while (quantidade != 0)
     {
@@ -118,13 +116,12 @@ void inicializa_aviao(char tabuleiro[TAM][TAM], int quantidade)
     
 }
 
-void inicializa_submarino(char tabuleiro[TAM][TAM], int quantidade)
+void posiciona_submarino(char tabuleiro[][TAM], int quantidade)
 {
     int x, y, direcao;
-    char id;
+    char id = '2';
 
     srand(time(NULL));
-    id = '2';
 
     while (quantidade != 0)
     {
@@ -174,13 +171,12 @@ void inicializa_submarino(char tabuleiro[TAM][TAM], int quantidade)
     
 }
 
-void inicializa_espiao1(char tabuleiro[TAM][TAM], int quantidade)
+void posiciona_espiao1(char tabuleiro[][TAM], int quantidade)
 {
     int x, y, direcao;
-    char id;
+    char id = '3';
 
     srand(time(NULL));
-    id = '3';
 
     while (quantidade != 0)
     {
@@ -238,13 +234,12 @@ void inicializa_espiao1(char tabuleiro[TAM][TAM], int quantidade)
     
 }
 
-void inicializa_espiao2(char tabuleiro[TAM][TAM], int quantidade)
+void posiciona_espiao2(char tabuleiro[][TAM], int quantidade)
 {
     int x, y, direcao;
-    char id;
+    char id = '4';
 
     srand(time(NULL));
-    id = '4';
 
     while (quantidade != 0)
     {
@@ -301,13 +296,12 @@ void inicializa_espiao2(char tabuleiro[TAM][TAM], int quantidade)
     }
 }
 
-void inicializa_porta_avioes(char tabuleiro[TAM][TAM], int quantidade)
+void posiciona_porta_avioes(char tabuleiro[][TAM], int quantidade)
 {
     int x, y, direcao;
-    char id;
+    char id = '5';
 
     srand(time(NULL));
-    id = '5';
 
     while (quantidade != 0)
     {
@@ -369,7 +363,7 @@ void inicializa_porta_avioes(char tabuleiro[TAM][TAM], int quantidade)
     
 }
 
-void conta_pecas_tabuleiro(char tabuleiro[TAM][TAM])
+void conta_pecas_tabuleiro(char tabuleiro[][TAM])
 {
     int boia, aviao, submarino, espiao1, espiao2, p_avioes;
     boia=aviao=submarino=espiao1=espiao2=p_avioes=0;
@@ -401,16 +395,16 @@ int main()
     srand(time(NULL));
     gerar_tabuleiro(tab_inimigo);
 
-    inicializa_boia(tab_inimigo, 10);
-    inicializa_aviao(tab_inimigo, 5);
-    inicializa_submarino(tab_inimigo, 5);
-    inicializa_espiao1(tab_inimigo, 4);
-    inicializa_espiao2(tab_inimigo, 4);
-    inicializa_porta_avioes(tab_inimigo, 2);
+    posiciona_boia(tab_inimigo, 10, -1, -1);
+    posiciona_aviao(tab_inimigo, 5);
+    posiciona_submarino(tab_inimigo, 5);
+    posiciona_espiao1(tab_inimigo, 4);
+    posiciona_espiao2(tab_inimigo, 4);
+    posiciona_porta_avioes(tab_inimigo, 2);
 
     mostra_tabuleiro(tab_inimigo);    
 
-    conta_pecas_tabuleiro(tab_inimigo);
+    //conta_pecas_tabuleiro(tab_inimigo);
     
     return 0; 
 }
