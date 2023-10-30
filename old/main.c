@@ -7,7 +7,6 @@
 #define TAM 20
 
 #define MAR '.'
-#define TIRO_NA_AGUA '#'
 
 #define ID_BOIA '0'
 #define ID_AVIAO '1'
@@ -16,19 +15,11 @@
 #define ID_ESPIAO2 '4'
 #define ID_PORTA_AVIOES '5'
 
-#define QTD_BOIA 10
-#define QTD_AVIAO 5
-#define QTD_SUBMARINO 5
-#define QTD_ESPIAO1 4
-#define QTD_ESPIAO2 4
-#define QTD_PORTA_AVIOES 2
-
 struct Peca_Principal
 {
     int linha;
     int coluna; 
     char direcao;
-    char id;
 };
 
 void inicializa_tabuleiro(char tabuleiro[][TAM])
@@ -74,14 +65,10 @@ bool verifica_posicao(char tabuleiro[][TAM], int tamanho, int posicoes[][2])
     return true;
 }
 
-void cria_posicoes_pecas(char id, int posicoes[][2], int linha, int coluna, char direcao)
+void cria_pecas(int id, int posicoes[][2], int linha, int coluna, char direcao)
 {
     switch (id)
     {
-    case '0':
-        posicoes[0][0] = linha;
-        posicoes[0][1] = coluna;
-        break;
     case '1':
         if (direcao == 'C'|| direcao == 'c')
         {
@@ -169,65 +156,6 @@ void cria_posicoes_pecas(char id, int posicoes[][2], int linha, int coluna, char
         }
         break;
     case '3':
-        if (direcao == 'C'|| direcao == 'c') // cima
-        {
-            posicoes[0][0] = linha-3;
-            posicoes[0][1] = coluna;
-            posicoes[1][0] = linha-2;
-            posicoes[1][1] = coluna;
-            posicoes[2][0] = linha-1;
-            posicoes[2][1] = coluna;
-            posicoes[3][0] = linha;
-            posicoes[3][1] = coluna;
-            posicoes[4][0] = linha;
-            posicoes[4][1] = coluna+1;
-            posicoes[5][0] = linha;
-            posicoes[5][1] = coluna-1;
-        } else if (direcao == 'B'|| direcao == 'b') //baixo
-        {
-            posicoes[0][0] = linha;
-            posicoes[0][1] = coluna;
-            posicoes[1][0] = linha;
-            posicoes[1][1] = coluna-1;
-            posicoes[2][0] = linha;
-            posicoes[2][1] = coluna+1;
-            posicoes[3][0] = linha+1;
-            posicoes[3][1] = coluna;
-            posicoes[4][0] = linha+2;
-            posicoes[4][1] = coluna;
-            posicoes[5][0] = linha+3;
-            posicoes[5][1] = coluna;
-        } else if (direcao == 'D'|| direcao == 'd') //direita
-        {
-            posicoes[0][0] = linha-1;
-            posicoes[0][1] = coluna;
-            posicoes[1][0] = linha;
-            posicoes[1][1] = coluna;
-            posicoes[2][0] = linha+1;
-            posicoes[2][1] = coluna;
-            posicoes[3][0] = linha;
-            posicoes[3][1] = coluna+1;
-            posicoes[4][0] = linha;
-            posicoes[4][1] = coluna+2;
-            posicoes[5][0] = linha;
-            posicoes[5][1] = coluna+3;
-        } else if (direcao == 'E'|| direcao == 'e') //esquerda
-        {
-            posicoes[0][0] = linha-1;
-            posicoes[0][1] = coluna;
-            posicoes[1][0] = linha;
-            posicoes[1][1] = coluna;
-            posicoes[2][0] = linha+1;
-            posicoes[2][1] = coluna;
-            posicoes[3][0] = linha;
-            posicoes[3][1] = coluna-1;
-            posicoes[4][0] = linha;
-            posicoes[4][1] = coluna-2;
-            posicoes[5][0] = linha;
-            posicoes[5][1] = coluna-3;
-        }
-        break;
-    case '4':
         if (direcao == 'C'|| direcao == 'c') // cima
         {
             posicoes[0][0] = linha-3;
@@ -382,18 +310,7 @@ void cria_posicoes_pecas(char id, int posicoes[][2], int linha, int coluna, char
     }
 }
 
-int informa_qtd_por_peca(char id)
-{
-    if(id == '0') return 1;
-    if(id == '1') return 4;
-    if(id == '2') return 4;
-    if(id == '3') return 5;
-    if(id == '4') return 5;
-    if(id == '5') return 10;
-    else return 0;
-}
-
-void salva_posicoes_iniciais(char *local_arquivo, int linha, int coluna, char orientacao, char id)
+void salva_posicoes(char *local_arquivo, int linha, int coluna, char orientacao, char id)
 {
     FILE *arquivo = fopen(local_arquivo, "a+");
 
@@ -406,53 +323,6 @@ void salva_posicoes_iniciais(char *local_arquivo, int linha, int coluna, char or
     }
     
     fclose(arquivo);
-}
-
-void salva_posicoes_ataque(char *local_arquivo, struct Peca_Principal peca)
-{
-    FILE *arquivo = fopen(local_arquivo, "a+");
-
-    if (arquivo != NULL)
-    {
-        fprintf(arquivo, "%d %d %c\n", peca.linha, peca.coluna, peca.id);
-    } else 
-    {
-        printf("Nao foi possivel abrir o arquivo: %s", local_arquivo);
-    }
-    
-    fclose(arquivo);
-}
-
-bool carrega_posicoes_iniciais(char *local_arquivo, char tabuleiro[][TAM])
-{
-    struct Peca_Principal peca;
-
-    FILE *arquivo = fopen(local_arquivo, "r");
-
-    if (arquivo == NULL)
-    {
-        printf("Nao foi possivel abrir o arquivo: %s", local_arquivo);
-        return false;
-    }
-    
-    inicializa_tabuleiro(tabuleiro);
-
-    while (fscanf(arquivo, "%d%d%s%s", &peca.linha, &peca.coluna, &peca.direcao, &peca.id) != EOF)
-    {
-        int qtd_por_peca = informa_qtd_por_peca(peca.id);
-        int parte_pecas[qtd_por_peca][2];
-
-        fflush(stdin);
-
-        cria_posicoes_pecas(peca.id, parte_pecas, peca.linha, peca.coluna, peca.direcao);
-
-        for (int i = 0; i < qtd_por_peca; i++)
-            tabuleiro[parte_pecas[i][0]][parte_pecas[i][1]] = peca.id;
-        
-    }
-
-    fclose(arquivo);
-    return true;
 }
 
 char gera_direcao_randomico()
@@ -481,7 +351,7 @@ struct Peca_Principal solicita_posicao_direaco(bool pega_direcao)
 
     fflush(stdin);
     if (pega_direcao){
-        printf("Informe a direcao (-, C, B, D, E): ");
+        printf("Informe a direcao (C, B, D, E): ");
         scanf("%c", &peca.direcao);
     }
 
@@ -495,11 +365,60 @@ struct Peca_Principal solicita_posicao_direaco(bool pega_direcao)
     else solicita_posicao_direaco(pega_direcao);
 }
 
-void posiciona_peca(char tabuleiro[][TAM], char id, int quantidade, int qtd_posicoes_peca, bool posicionamento_automatico, char *local_arquivo)
+void posiciona_boia(char tabuleiro[][TAM], int quantidade, bool posicionamento_automatico, char *local_arquivo)
 {   
     srand(time(NULL));
 
-    int contador = 0, parte_pecas[qtd_posicoes_peca][2];
+    int contador = 0, parte_pecas[1][2];
+    struct Peca_Principal peca;
+
+    if (posicionamento_automatico)
+    {
+        do
+        {
+            peca.linha = rand() % 20;
+            peca.coluna = rand() % 20;
+
+            parte_pecas[0][0] = peca.linha;
+            parte_pecas[0][1] = peca.coluna;
+            
+            if (verifica_posicao(tabuleiro, 1, parte_pecas))
+            {
+                tabuleiro[peca.linha][peca.coluna] = ID_BOIA;
+                salva_posicoes(local_arquivo, peca.linha, peca.coluna, '-', ID_BOIA);
+            } else continue;
+
+            contador++; 
+        } while (contador < quantidade);
+    } else
+    {
+        do
+        {   
+            peca = solicita_posicao_direaco(false);
+
+            parte_pecas[0][0] = peca.linha;
+            parte_pecas[0][1] = peca.coluna;
+            
+            if (verifica_posicao(tabuleiro, 1, parte_pecas))
+            {
+                tabuleiro[peca.linha][peca.coluna] = ID_BOIA;
+
+                salva_posicoes(local_arquivo, peca.linha, peca.coluna, '-', ID_BOIA);
+
+                mostra_tabuleiro(tabuleiro);
+            } else continue;
+
+            contador++; 
+        } while (contador < quantidade);
+    }
+    
+}
+
+void posiciona_aviao(char tabuleiro[][TAM], int quantidade, bool posicionamento_automatico, char *local_arquivo)
+{   
+    srand(time(NULL));
+
+    int contador = 0, parte_pecas[4][2];
     struct Peca_Principal peca;
 
     if (posicionamento_automatico)
@@ -508,16 +427,16 @@ void posiciona_peca(char tabuleiro[][TAM], char id, int quantidade, int qtd_posi
         {
             peca.linha = rand() % 19;
             peca.coluna = rand() % 19;
-            peca.direcao = id=='0' ? '-': gera_direcao_randomico();
+            peca.direcao = gera_direcao_randomico();
 
-            cria_posicoes_pecas(id, parte_pecas, peca.linha, peca.coluna, peca.direcao);
+            cria_pecas(ID_AVIAO, parte_pecas, peca.linha, peca.coluna, peca.direcao);
 
-            if (verifica_posicao(tabuleiro, qtd_posicoes_peca, parte_pecas))
+            if (verifica_posicao(tabuleiro, 4, parte_pecas))
             {
-                for (int i = 0; i < qtd_posicoes_peca; i++)
-                    tabuleiro[parte_pecas[i][0]][parte_pecas[i][1]] = id;
+                for (int i = 0; i < 4; i++)
+                    tabuleiro[parte_pecas[i][0]][parte_pecas[i][1]] = ID_AVIAO;
 
-                salva_posicoes_iniciais(local_arquivo, peca.linha, peca.coluna, peca.direcao, id);
+                salva_posicoes(local_arquivo, peca.linha, peca.coluna, peca.direcao, ID_AVIAO);
 
             } else continue;
 
@@ -525,23 +444,21 @@ void posiciona_peca(char tabuleiro[][TAM], char id, int quantidade, int qtd_posi
         } while (contador < quantidade);
     } else
     {
-        printf("\n----------------------------\n");
-        printf("Peca a ser posicionada: %c", id);
-        printf("\n----------------------------\n");
         do
         {
             mostra_tabuleiro(tabuleiro);
 
             peca = solicita_posicao_direaco(true);
 
-            cria_posicoes_pecas(id, parte_pecas, peca.linha, peca.coluna, peca.direcao);
+            
+            cria_pecas(ID_AVIAO, parte_pecas, peca.linha, peca.coluna, peca.direcao);
 
-            if (verifica_posicao(tabuleiro, qtd_posicoes_peca, parte_pecas))
+            if (verifica_posicao(tabuleiro, 4, parte_pecas))
             {
-                for (int i = 0; i < qtd_posicoes_peca; i++)
-                    tabuleiro[parte_pecas[i][0]][parte_pecas[i][1]] = id;
+                for (int i = 0; i < 4; i++)
+                    tabuleiro[parte_pecas[i][0]][parte_pecas[i][1]] = ID_AVIAO;
 
-                salva_posicoes_iniciais(local_arquivo, peca.linha, peca.coluna, peca.direcao, id);
+                salva_posicoes(local_arquivo, peca.linha, peca.coluna, peca.direcao, ID_AVIAO);
 
             } else continue;
 
@@ -550,150 +467,278 @@ void posiciona_peca(char tabuleiro[][TAM], char id, int quantidade, int qtd_posi
     }
 }
 
-void inicializa_player(char tabuleiro[][TAM], bool posicionamento_automatico, char *local_salvamento)
-{
-    printf("\n-------------------PLAYER------------------\n\n");
-    inicializa_tabuleiro(tabuleiro);
-    posiciona_peca(tabuleiro, ID_BOIA, QTD_BOIA, 1, posicionamento_automatico, local_salvamento);
-    posiciona_peca(tabuleiro, ID_AVIAO, QTD_AVIAO, 4, posicionamento_automatico, local_salvamento);
-    posiciona_peca(tabuleiro, ID_SUBMARINO, QTD_SUBMARINO, 4, posicionamento_automatico, local_salvamento);
-    posiciona_peca(tabuleiro, ID_ESPIAO1, QTD_ESPIAO1, 6, posicionamento_automatico, local_salvamento);
-    posiciona_peca(tabuleiro, ID_ESPIAO2, QTD_ESPIAO2, 6, posicionamento_automatico, local_salvamento);
-    posiciona_peca(tabuleiro, ID_PORTA_AVIOES, QTD_PORTA_AVIOES, 10, posicionamento_automatico, local_salvamento);
-}
-
-char verifica_ataque(char tabuleiro[][TAM], struct Peca_Principal peca)
-{
-    if (tabuleiro[peca.linha][peca.coluna] == MAR)
-    {
-        return TIRO_NA_AGUA;
-    } else 
-    {
-        return tabuleiro[peca.linha][peca.coluna];
-    }
-}
-
-void ataque(bool jogador, char tabuleiro_real[][TAM], char tabuleiro_sombra[][TAM])
-{
-    struct Peca_Principal peca;
-
+void posiciona_submarino(char tabuleiro[][TAM], int quantidade, bool posicionamento_automatico, char *local_arquivo)
+{   
     srand(time(NULL));
 
-    if (jogador)
+    int contador = 0, parte_pecas[4][2];
+    struct Peca_Principal peca;
+
+    if (posicionamento_automatico)
     {
-        printf("\n================ VEZ DO JOGADOR ================\n");
+        do
+        {
+            peca.linha = rand() % 19;
+            peca.coluna = rand() % 19;
+            peca.direcao = gera_direcao_randomico();
 
-        mostra_tabuleiro(tabuleiro_sombra);
+            cria_pecas(ID_SUBMARINO, parte_pecas, peca.linha, peca.coluna, peca.direcao);
 
-        printf("\n--------------------");
-        printf("\n-> Linha: ");
-        scanf("%d", &peca.linha);
-        printf("\n-> Coluna: ");
-        scanf("%d", &peca.coluna);
-        printf("\n--------------------");
+            if (verifica_posicao(tabuleiro, 4, parte_pecas))
+            {
+                for (int i = 0; i < 4; i++)
+                    tabuleiro[parte_pecas[i][0]][parte_pecas[i][1]] = ID_SUBMARINO;
 
-        peca.id = verifica_ataque(tabuleiro_real, peca);
-        tabuleiro_sombra[peca.linha][peca.coluna] = peca.id;
+                salva_posicoes(local_arquivo, peca.linha, peca.coluna, peca.direcao, ID_SUBMARINO);
 
-        salva_posicoes_ataque("./ATAQUES_JOGADOR.TXT", peca);
+            } else continue;
+
+            contador++; 
+        } while (contador < quantidade);
     } else
     {
-        printf("\n================ VEZ DA IA ================\n");
-        peca.linha = rand() % 19;
-        peca.coluna = rand() % 19;
-        peca.id = verifica_ataque(tabuleiro_real, peca);
+        do
+        {
+            mostra_tabuleiro(tabuleiro);
 
-        tabuleiro_sombra[peca.linha][peca.coluna] = peca.id;
+            peca = solicita_posicao_direaco(true);
 
-        salva_posicoes_ataque("./ATAQUES_INIMIGO.TXT", peca);
-        
-        mostra_tabuleiro(tabuleiro_sombra);
+            
+            cria_pecas(ID_SUBMARINO, parte_pecas, peca.linha, peca.coluna, peca.direcao);
+
+            if (verifica_posicao(tabuleiro, 4, parte_pecas))
+            {
+                for (int i = 0; i < 4; i++)
+                    tabuleiro[parte_pecas[i][0]][parte_pecas[i][1]] = ID_SUBMARINO;
+
+                salva_posicoes(local_arquivo, peca.linha, peca.coluna, peca.direcao, ID_SUBMARINO);
+
+            } else continue;
+
+            contador++; 
+        } while (contador < quantidade);
     }
-    
 }
 
-int verifica_pontuacao(char tabuleiro[][TAM])
+void posiciona_espiao1(char tabuleiro[][TAM], int quantidade, bool posicionamento_automatico, char *local_arquivo)
+{   
+    srand(time(NULL));
+
+    int contador = 0, parte_pecas[6][2];
+    struct Peca_Principal peca;
+
+    if (posicionamento_automatico)
+    {
+        do
+        {
+            peca.linha = rand() % 19;
+            peca.coluna = rand() % 19;
+            peca.direcao = gera_direcao_randomico();
+
+            cria_pecas(ID_ESPIAO1, parte_pecas, peca.linha, peca.coluna, peca.direcao);
+
+            if (verifica_posicao(tabuleiro, 6, parte_pecas))
+            {
+                for (int i = 0; i < 6; i++)
+                    tabuleiro[parte_pecas[i][0]][parte_pecas[i][1]] = ID_ESPIAO1;
+
+                salva_posicoes(local_arquivo, peca.linha, peca.coluna, peca.direcao, ID_ESPIAO1);
+
+            } else continue;
+
+            contador++; 
+        } while (contador < quantidade);
+    } else
+    {
+        do
+        {
+            mostra_tabuleiro(tabuleiro);
+
+            peca = solicita_posicao_direaco(true);
+
+            
+            cria_pecas(ID_ESPIAO1, parte_pecas, peca.linha, peca.coluna, peca.direcao);
+
+            if (verifica_posicao(tabuleiro, 6, parte_pecas))
+            {
+                for (int i = 0; i < 6; i++)
+                    tabuleiro[parte_pecas[i][0]][parte_pecas[i][1]] = ID_ESPIAO1;
+
+                salva_posicoes(local_arquivo, peca.linha, peca.coluna, peca.direcao, ID_ESPIAO1);
+
+            } else continue;
+
+            contador++; 
+        } while (contador < quantidade);
+    }
+}
+
+void posiciona_espiao2(char tabuleiro[][TAM], int quantidade, bool posicionamento_automatico, char *local_arquivo)
+{   
+    srand(time(NULL));
+
+    int contador = 0, parte_pecas[6][2];
+    struct Peca_Principal peca;
+
+    if (posicionamento_automatico)
+    {
+        do
+        {
+            peca.linha = rand() % 19;
+            peca.coluna = rand() % 19;
+            peca.direcao = gera_direcao_randomico();
+
+            cria_pecas(ID_ESPIAO1, parte_pecas, peca.linha, peca.coluna, peca.direcao);
+
+            if (verifica_posicao(tabuleiro, 6, parte_pecas))
+            {
+                for (int i = 0; i < 6; i++)
+                    tabuleiro[parte_pecas[i][0]][parte_pecas[i][1]] = ID_ESPIAO2;
+
+                salva_posicoes(local_arquivo, peca.linha, peca.coluna, peca.direcao, ID_ESPIAO2);
+
+            } else continue;
+
+            contador++; 
+        } while (contador < quantidade);
+    } else
+    {
+        do
+        {
+            mostra_tabuleiro(tabuleiro);
+
+            peca = solicita_posicao_direaco(true);
+            
+            cria_pecas(ID_ESPIAO1, parte_pecas, peca.linha, peca.coluna, peca.direcao);
+
+            if (verifica_posicao(tabuleiro, 6, parte_pecas))
+            {
+                for (int i = 0; i < 6; i++)
+                    tabuleiro[parte_pecas[i][0]][parte_pecas[i][1]] = ID_ESPIAO2;
+
+                salva_posicoes(local_arquivo, peca.linha, peca.coluna, peca.direcao, ID_ESPIAO2);
+
+            } else continue;
+
+            contador++; 
+        } while (contador < quantidade);
+    }
+}
+
+void posiciona_porta_avioes(char tabuleiro[][TAM], int quantidade, bool posicionamento_automatico, char *local_arquivo)
+{   
+    srand(time(NULL));
+
+    int contador = 0, parte_pecas[10][2];
+    struct Peca_Principal peca;
+
+    if (posicionamento_automatico)
+    {
+        do
+        {
+            peca.linha = rand() % 19;
+            peca.coluna = rand() % 19;
+            peca.direcao = gera_direcao_randomico();
+
+            cria_pecas(ID_PORTA_AVIOES, parte_pecas, peca.linha, peca.coluna, peca.direcao);
+
+            if (verifica_posicao(tabuleiro, 10, parte_pecas))
+            {
+                for (int i = 0; i < 10; i++)
+                    tabuleiro[parte_pecas[i][0]][parte_pecas[i][1]] = ID_PORTA_AVIOES;
+
+                salva_posicoes(local_arquivo, peca.linha, peca.coluna, peca.direcao, ID_PORTA_AVIOES);
+
+            } else continue;
+
+            contador++; 
+        } while (contador < quantidade);
+    } else
+    {
+        do
+        {
+            mostra_tabuleiro(tabuleiro);
+
+            peca = solicita_posicao_direaco(true);
+            
+            cria_pecas(ID_PORTA_AVIOES, parte_pecas, peca.linha, peca.coluna, peca.direcao);
+
+            if (verifica_posicao(tabuleiro, 10, parte_pecas))
+            {
+                for (int i = 0; i < 10; i++)
+                    tabuleiro[parte_pecas[i][0]][parte_pecas[i][1]] = ID_PORTA_AVIOES;
+
+                salva_posicoes(local_arquivo, peca.linha, peca.coluna, peca.direcao, ID_PORTA_AVIOES);
+
+            } else continue;
+
+            contador++; 
+        } while (contador < quantidade);
+    }
+}
+
+void conta_pecas_tabuleiro(char tabuleiro[][TAM])
 {
-    int contador = 0;
+    int boia, aviao, submarino, espiao1, espiao2, p_avioes;
+    boia=aviao=submarino=espiao1=espiao2=p_avioes=0;
+
     for (int i = 0; i < TAM; i++)
     {
         for (int j = 0; j < TAM; j++)
         {
-            if(tabuleiro[i][j] != MAR && tabuleiro[i][j] != TIRO_NA_AGUA) contador++; 
+            if (tabuleiro[i][j] == '0') boia++;
+            if (tabuleiro[i][j] == '1') aviao++;
+            if (tabuleiro[i][j] == '2') submarino++;
+            if (tabuleiro[i][j] == '3') espiao1++;
+            if (tabuleiro[i][j] == '4') espiao2++;
+            if (tabuleiro[i][j] == '5') p_avioes++;
         }
-        
     }
-    return contador;
+
+    printf("\n--------------------------------------------\n");
+    printf("Boias: %d \n", boia);
+    printf("Aviao: %d \n", aviao/4);
+    printf("Submarino: %d \n", submarino/4);
+    printf("Espiao 1: %d \n", espiao1/6);
+    printf("Espiao 2: %d \n", espiao2/6);
+    printf("P. Avioes: %d \n", p_avioes/10);
 }
 
-void anuncia_vencedor(bool jogador)
+void inicializa_inimigo(char tabuleiro[][TAM])
 {
-    if (jogador)
-    {
-        printf("\n==============================================\n");
-        printf("||                JOGADOR VENCEU             ||\n");
-        printf("==============================================\n\n");
-        exit(0);
-    } else
-    {
-        printf("\n==============================================\n");
-        printf("||                  IA VENCEU                ||\n");
-        printf("==============================================\n\n");
-        exit(0);
-    }
+    char *arquivo_de_salvamento = "../DB/MATRIZ_INIMIGO.txt";
+
+    inicializa_tabuleiro(tabuleiro);
+    posiciona_boia(tabuleiro, 10, true, arquivo_de_salvamento);
+    posiciona_aviao(tabuleiro,  5, true, arquivo_de_salvamento);
+    posiciona_submarino(tabuleiro, 5, true, arquivo_de_salvamento);
+    posiciona_espiao1(tabuleiro, 4, true, arquivo_de_salvamento);
+    posiciona_espiao2(tabuleiro, 4, true, arquivo_de_salvamento);
+    posiciona_porta_avioes(tabuleiro, 2, true, arquivo_de_salvamento);
     
-    
+    //mostra_tabuleiro(tabuleiro);
 }
 
-void menu_batalha(char tabuleiro_IA[][TAM],char tab_sombra_IA[][TAM], char tabuleiro_jogador[][TAM], char tab_sombra_jogador[][TAM])
+void inicializa_player(char tabuleiro[][TAM])
 {
-    int opcoes_menu_guerra, pontos_jogador, pontos_IA;
+    char *arquivo_de_salvamento = "../DB/MATRIZ_PLAYER.txt";
 
-    pontos_IA = verifica_pontuacao(tab_sombra_jogador);
-    pontos_jogador = verifica_pontuacao(tab_sombra_IA);
+    printf("\n-------------------PLAYER------------------\n\n");
+    inicializa_tabuleiro(tabuleiro);
+    posiciona_boia(tabuleiro, 10, true, arquivo_de_salvamento);
+    posiciona_aviao(tabuleiro,  5, true, arquivo_de_salvamento);
+    posiciona_submarino(tabuleiro, 5, true, arquivo_de_salvamento);
+    posiciona_espiao1(tabuleiro, 4, true, arquivo_de_salvamento);
+    posiciona_espiao2(tabuleiro, 4, true, arquivo_de_salvamento);
+    posiciona_porta_avioes(tabuleiro, 2, false, arquivo_de_salvamento);
 
-    printf("\n==============================================\n");
-    printf("||               MENU DE GUERRA             ||\n");
-    printf("==============================================\n\n");
-
-    if (pontos_IA == 30) anuncia_vencedor(false);
-    else if(pontos_jogador == 30) anuncia_vencedor(true);
-    else{
-        printf("Pontos Jogador: %d\n", pontos_jogador);
-        printf("Pontos IA: %d\n", pontos_IA);
-    }
-
-    printf("-- MENU --\n");
-    printf("1) Atacar\n2) Sair\n");
-    scanf("%d", &opcoes_menu_guerra);
-
-    switch (opcoes_menu_guerra)
-    {
-    case 1:
-        ataque(true, tabuleiro_IA, tab_sombra_IA); // vez do jogador
-        ataque(false, tabuleiro_jogador, tab_sombra_jogador); // vez da IA
-
-        menu_batalha(tabuleiro_IA, tab_sombra_IA, tabuleiro_jogador, tab_sombra_jogador);
-        break;
-    case 2:
-        menu_inicial(tabuleiro_IA, tabuleiro_jogador);
-        break;
-    
-    default:
-        printf("__Mensagem__\n");
-        printf("Erro: Opcao Invalida!\n");
-        menu_batalha(tabuleiro_IA, tab_sombra_IA, tabuleiro_jogador, tab_sombra_jogador);
-        break;
-    }
+    mostra_tabuleiro(tabuleiro);
 }
 
-void menu_inicial(char tabuleiro_IA[][TAM], char tabuleiro_jogador[][TAM])
+
+void menu_inicial(char tabuleiro_inimigo[][TAM], char tabuleiro_player[][TAM])
 {
     int opcao_menu_inicial;
-    char tab_sombra_IA[TAM][TAM], tab_sombra_jogador[TAM][TAM];
-
-    inicializa_tabuleiro(tab_sombra_IA);
-    inicializa_tabuleiro(tab_sombra_jogador);
 
     printf("\n============================================\n");
     printf("||              BATALHA NAVAL             ||\n");
@@ -706,33 +751,24 @@ void menu_inicial(char tabuleiro_IA[][TAM], char tabuleiro_jogador[][TAM])
     switch (opcao_menu_inicial)
     {
     case 1:
-        inicializa_player(tabuleiro_IA, true, "./MATRIZ_INIMIGO.TXT");
-        inicializa_player(tabuleiro_jogador, false, "./MATRIZ_JOGADOR.TXT");
-
-        //mostra_tabuleiro(tabuleiro_jogador);
-
-        menu_batalha(tabuleiro_IA, tab_sombra_IA, tabuleiro_jogador, tab_sombra_jogador);
+        inicializa_inimigo(tabuleiro_inimigo);
+        inicializa_player(tabuleiro_player);
         break;
-    case 2:
-        carrega_posicoes_iniciais("./MATRIZ_INIMIGO.TXT", tabuleiro_IA);
-        carrega_posicoes_iniciais("./MATRIZ_JOGADOR.TXT", tabuleiro_jogador);
-
-        menu_batalha(tabuleiro_IA, tab_sombra_IA, tabuleiro_jogador, tab_sombra_jogador);
-        break;
+    
     default:
         printf("__Mensagem__\n");
         printf("Erro: Opcao Invalida!\n");
-        menu_inicial(tabuleiro_IA, tabuleiro_jogador);
+        menu_inicial(tabuleiro_inimigo, tabuleiro_player);
         break;
     }
 }
 
 int main()
 {
-    char tabuleiro_IA[TAM][TAM];
-    char tabuleiro_jogador[TAM][TAM];
+    char tabuleiro_inimigo[TAM][TAM];
+    char tabuleiro_player[TAM][TAM];
 
-    menu_inicial(tabuleiro_IA, tabuleiro_jogador);
+    menu_inicial(tabuleiro_inimigo, tabuleiro_inimigo);
 
     return 0;
 }
