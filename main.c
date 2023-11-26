@@ -34,6 +34,8 @@ struct Peca
 bool TIRO_ALEATORIO = true;
 struct Peca peca_temp_IA;
 int qtd_chances_IA;
+char DIRECAO[4] = {'C', 'B', 'D', 'E'};
+bool eh_resolvedor = false;
 
 void limpa_tela()
 {
@@ -73,6 +75,50 @@ void mostra_tabuleiro(char tabuleiro[][TAM])
         }
         printf("\n");
     }
+}
+
+int conta_pecas_acertadas(char tabuleiro[][TAM])
+{
+    int contador = 0;
+    for (int i = 0; i < TAM; i++)
+    {
+        for (int j = 0; j < TAM; j++)
+        {
+            if(tabuleiro[i][j] != MAR && tabuleiro[i][j] != TIRO_NA_AGUA) contador++; 
+        }
+        
+    }
+    return contador;
+}
+
+int conta_pecas_erradas(char tabuleiro[][TAM])
+{
+    int contador = 0;
+    for (int i = 0; i < TAM; i++)
+    {
+        for (int j = 0; j < TAM; j++) if(tabuleiro[i][j] == TIRO_NA_AGUA) contador++; 
+        
+    }
+    return contador;
+}
+
+void anuncia_vencedor(bool jogador)
+{
+    if (jogador)
+    {
+        printf("\n==============================================\n");
+        printf("||                JOGADOR VENCEU             ||\n");
+        printf("==============================================\n\n");
+        exit(0);
+    } else
+    {
+        printf("\n==============================================\n");
+        printf("||                  IA VENCEU                ||\n");
+        printf("==============================================\n\n");
+        exit(0);
+    }
+    
+    
 }
 
 bool verifica_posicao(char tabuleiro[][TAM], int tamanho, int posicoes[][2])
@@ -548,16 +594,6 @@ bool carrega_posicoes_jogadas(char *local_arquivo, char tabuleiro[][TAM])
     return true;
 }
 
-char gera_direcao_randomico()
-{
-    srand(time(NULL));
-
-    int posicao = rand() % 4;
-    char direcao[4] = {'C', 'B', 'D', 'E'};
-
-    return direcao[posicao];
-}
-
 struct Peca solicita_posicao_direaco(bool pega_direcao)
 {
     struct Peca peca; 
@@ -601,7 +637,7 @@ void posiciona_peca(char tabuleiro[][TAM], char id, int quantidade, int qtd_posi
         {
             peca.linha = rand() % 19;
             peca.coluna = rand() % 19;
-            peca.direcao = id=='0' ? '-': gera_direcao_randomico();
+            peca.direcao = id=='0' ? '-': DIRECAO[rand()%4];
             peca.id = id;
 
             cria_posicoes_pecas(id, parte_pecas, peca);
@@ -647,7 +683,6 @@ void posiciona_peca(char tabuleiro[][TAM], char id, int quantidade, int qtd_posi
 
 void inicializa_player(char tabuleiro[][TAM], bool posicionamento_automatico, char *local_salvamento)
 {
-    printf("\n-------------------PLAYER------------------\n\n");
     inicializa_tabuleiro(tabuleiro);
     posiciona_peca(tabuleiro, ID_BOIA, QTD_BOIA, 1, posicionamento_automatico, local_salvamento);
     posiciona_peca(tabuleiro, ID_AVIAO, QTD_AVIAO, 4, posicionamento_automatico, local_salvamento);
@@ -707,8 +742,8 @@ bool ataque(bool jogador, char tabuleiro_real[][TAM], char tabuleiro_sombra[][TA
         
         if(TIRO_ALEATORIO) 
         {
-            peca.linha = rand() % 19;
-            peca.coluna = rand() % 19;
+            peca.linha = rand() % TAM;
+            peca.coluna = rand() % TAM;
             peca.id = verifica_ataque(false, tabuleiro_real, tabuleiro_sombra, peca);
 
             if (peca.id == ' ') {
@@ -722,7 +757,7 @@ bool ataque(bool jogador, char tabuleiro_real[][TAM], char tabuleiro_sombra[][TA
 
             tabuleiro_sombra[peca.linha][peca.coluna] = peca.id;
 
-            salva_posicoes_ataque("./ATAQUES_INIMIGO.TXT", peca);
+            if (!eh_resolvedor) salva_posicoes_ataque("./ATAQUES_INIMIGO.TXT", peca);
             
             mostra_tabuleiro(tabuleiro_sombra);
         } else 
@@ -753,10 +788,9 @@ bool ataque(bool jogador, char tabuleiro_real[][TAM], char tabuleiro_sombra[][TA
                     peca.linha = posicoes_ataque_IA[posicao][0];
                     peca.coluna = posicoes_ataque_IA[posicao][1];
 
-                    printf("l: %d, c: %d\n", peca.linha, peca.coluna);
+                    //printf("l: %d, c: %d\n", peca.linha, peca.coluna);
                     
                     peca.id = verifica_ataque(false, tabuleiro_real, tabuleiro_sombra, peca);
-                    printf("id: %c\n", peca.id);
                     cont++;
                 } while (peca.id == ' ');
                 
@@ -770,9 +804,7 @@ bool ataque(bool jogador, char tabuleiro_real[][TAM], char tabuleiro_sombra[][TA
 
                 tabuleiro_sombra[peca.linha][peca.coluna] = peca.id;
 
-                salva_posicoes_ataque("./ATAQUES_INIMIGO.TXT", peca);
-                
-                
+                if (!eh_resolvedor) salva_posicoes_ataque("./ATAQUES_INIMIGO.TXT", peca);
                 mostra_tabuleiro(tabuleiro_sombra);
             }
         }
@@ -780,45 +812,26 @@ bool ataque(bool jogador, char tabuleiro_real[][TAM], char tabuleiro_sombra[][TA
     }
 }
 
-int verifica_pontuacao(char tabuleiro[][TAM])
+void resolvedor(char tabuleiro_real[][TAM], char tabuleiro_sombra[][TAM])
 {
-    int contador = 0;
-    for (int i = 0; i < TAM; i++)
+    if (conta_pecas_acertadas(tabuleiro_sombra) != 118)
     {
-        for (int j = 0; j < TAM; j++)
-        {
-            if(tabuleiro[i][j] != MAR && tabuleiro[i][j] != TIRO_NA_AGUA) contador++; 
-        }
-        
-    }
-    return contador;
-}
+        ataque(false, tabuleiro_real, tabuleiro_sombra);
+        printf("Acertos: %d", conta_pecas_acertadas(tabuleiro_sombra));
+        printf("Erros: %d", conta_pecas_erradas(tabuleiro_sombra));
+        sleep(1);
+        limpa_tela();
 
-void anuncia_vencedor(bool jogador)
-{
-    if (jogador)
-    {
-        printf("\n==============================================\n");
-        printf("||                JOGADOR VENCEU             ||\n");
-        printf("==============================================\n\n");
-        exit(0);
-    } else
-    {
-        printf("\n==============================================\n");
-        printf("||                  IA VENCEU                ||\n");
-        printf("==============================================\n\n");
-        exit(0);
-    }
-    
-    
+        return resolvedor(tabuleiro_real, tabuleiro_sombra);
+    } else printf("deu boa");
 }
 
 void menu_batalha(char tabuleiro_IA[][TAM],char tab_sombra_IA[][TAM], char tabuleiro_jogador[][TAM], char tab_sombra_jogador[][TAM])
 {
     int opcoes_menu_guerra, pontos_jogador, pontos_IA;
 
-    pontos_IA = verifica_pontuacao(tab_sombra_jogador);
-    pontos_jogador = verifica_pontuacao(tab_sombra_IA);
+    pontos_IA = conta_pecas_acertadas(tab_sombra_jogador);
+    pontos_jogador = conta_pecas_acertadas(tab_sombra_IA);
 
     printf("\n==============================================\n");
     printf("||               MENU DE GUERRA             ||\n");
@@ -834,7 +847,7 @@ void menu_batalha(char tabuleiro_IA[][TAM],char tab_sombra_IA[][TAM], char tabul
 
 
     printf("-- MENU --\n");
-    printf("1) Atacar\n2) Sair\n");
+    printf("1) Atacar\n2) Resolvedor\n3) Sair\n");
     scanf("%d", &opcoes_menu_guerra);
 
     switch (opcoes_menu_guerra)
@@ -848,6 +861,11 @@ void menu_batalha(char tabuleiro_IA[][TAM],char tab_sombra_IA[][TAM], char tabul
         menu_batalha(tabuleiro_IA, tab_sombra_IA, tabuleiro_jogador, tab_sombra_jogador);
         break;
     case 2:
+        printf("Resolvedor bolado!\n");
+        eh_resolvedor = true;
+        resolvedor(tabuleiro_IA,  tab_sombra_IA);
+        break;
+    case 3:
         menu_inicial(tabuleiro_IA, tabuleiro_jogador);
         break;
     
@@ -862,7 +880,7 @@ void menu_batalha(char tabuleiro_IA[][TAM],char tab_sombra_IA[][TAM], char tabul
 void menu_inicial(char tabuleiro_IA[][TAM], char tabuleiro_jogador[][TAM])
 {
     int opcao_menu_inicial;
-    char tab_sombra_IA[TAM][TAM], tab_sombra_jogador[TAM][TAM];
+    char tab_sombra_IA[TAM][TAM], tab_sombra_jogador[TAM][TAM], opcao_posicionamento;
 
     limpa_tela();
 
@@ -877,14 +895,29 @@ void menu_inicial(char tabuleiro_IA[][TAM], char tabuleiro_jogador[][TAM])
     switch (opcao_menu_inicial)
     {
     case 1:
-        inicializa_player(tabuleiro_IA, true, "./MATRIZ_INIMIGO.TXT");
-        inicializa_player(tabuleiro_jogador, true, "./MATRIZ_JOGADOR.TXT");
+        printf("\n-------------------INIMIGO------------------\n\n");
+        printf("Inimigo sendo gerado. Aguarde!\n");
+        inicializa_tabuleiro(tab_sombra_IA);
+        inicializa_player(tabuleiro_IA, true, "./TABULEIRO_INIMIGO.TXT");
+        printf("Inimigo criado!\n");
+        //conta_pecas_tabuleiro(tabuleiro_IA);
+
+        printf("\n-------------------JOGADOR------------------\n\n");
+        printf("Posicionamento automatico?\n1) Sim\n2) Nao\n");
+        scanf("%d", &opcao_posicionamento);
+        
+        inicializa_tabuleiro(tab_sombra_jogador);
+        if (opcao_posicionamento == 1) 
+            inicializa_player(tabuleiro_jogador, true, "./TABULEIRO_JOGADOR.TXT");
+        else inicializa_player(tabuleiro_jogador, false, "./TABULEIRO_JOGADOR.TXT");
+        //conta_pecas_tabuleiro(tabuleiro_jogador);
+        
 
         menu_batalha(tabuleiro_IA, tab_sombra_IA, tabuleiro_jogador, tab_sombra_jogador);
         break;
     case 2:
-        carrega_posicoes_iniciais("./MATRIZ_INIMIGO.TXT", tabuleiro_IA);
-        carrega_posicoes_iniciais("./MATRIZ_JOGADOR.TXT", tabuleiro_jogador);
+        carrega_posicoes_iniciais("./TABULEIRO_INIMIGO.TXT", tabuleiro_IA);
+        carrega_posicoes_iniciais("./TABULEIRO_JOGADOR.TXT", tabuleiro_jogador);
 
         carrega_posicoes_jogadas("./ATAQUES_INIMIGO.TXT", tab_sombra_jogador);
         carrega_posicoes_jogadas("./ATAQUES_JOGADOR.TXT", tab_sombra_IA);
