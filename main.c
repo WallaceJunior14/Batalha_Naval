@@ -31,10 +31,12 @@ struct Peca
     char id;
 };
 
-bool TIRO_ALEATORIO = true;
+struct Peca peca_temp_inicial_IA;
 struct Peca peca_temp_IA;
-int qtd_chances_IA;
+int volta_posicao_inicial = 0;
+int chances_IA;
 char DIRECAO[4] = {'C', 'B', 'D', 'E'};
+bool TIRO_ALEATORIO = true;
 bool eh_resolvedor = false;
 
 void limpa_tela()
@@ -119,6 +121,22 @@ void anuncia_vencedor(bool jogador)
     }
     
     
+}
+
+void mostra_placar(char tab_sombra_jogador[][TAM], char tab_sombra_IA[][TAM])
+{
+    int pontos_IA = conta_pecas_acertadas(tab_sombra_jogador);
+    int pontos_jogador = conta_pecas_acertadas(tab_sombra_IA);
+
+    if (pontos_IA == 118) anuncia_vencedor(false);
+    else if(pontos_jogador == 118) anuncia_vencedor(true);
+    else{
+        printf("+-------------------------------+\n");
+        printf("|           PONTUACAO           |\n");
+        printf("+-------------------------------+\n");
+        printf("| Jogador: %3d  | Maquina: %3d  |\n", pontos_jogador, pontos_IA);
+        printf("+-------------------------------+\n\n");
+    }
 }
 
 bool verifica_posicao(char tabuleiro[][TAM], int tamanho, int posicoes[][2])
@@ -463,6 +481,17 @@ void cria_posicoes_pecas(char id, int posicoes[][2], struct Peca peca)
         posicoes[7][0] = linha+1;
         posicoes[7][1] = coluna-1;
         break;
+
+    case 'R':
+        posicoes[0][0] = linha-1;
+        posicoes[0][1] = coluna;
+        posicoes[1][0] = linha+1;
+        posicoes[1][1] = coluna;
+        posicoes[2][0] = linha;
+        posicoes[2][1] = coluna-1;
+        posicoes[3][0] = linha;
+        posicoes[3][1] = coluna+1;
+        break;
     default:
         break;
     }
@@ -694,7 +723,7 @@ void inicializa_player(char tabuleiro[][TAM], bool posicionamento_automatico, ch
 
 char verifica_ataque(bool jogador, char tabuleiro_real[][TAM], char tabuleiro_sombra[][TAM], struct Peca peca)
 {
-    if (tabuleiro_sombra[peca.linha][peca.coluna] != MAR )
+    if (tabuleiro_sombra[peca.linha][peca.coluna] != MAR)
     {
         if (jogador) printf("\nPosicao ja jogada. Informe outra posicao!\n");
         return ' ';
@@ -739,7 +768,6 @@ bool ataque(bool jogador, char tabuleiro_real[][TAM], char tabuleiro_sombra[][TA
     } else
     {
         // ALGORITIMO DE ATAQUE DA IA
-        
         if(TIRO_ALEATORIO) 
         {
             peca.linha = rand() % TAM;
@@ -752,7 +780,7 @@ bool ataque(bool jogador, char tabuleiro_real[][TAM], char tabuleiro_sombra[][TA
             {
                 peca_temp_IA = peca;
                 TIRO_ALEATORIO = false;
-                qtd_chances_IA = 7;
+                chances_IA = 7;
             }
 
             tabuleiro_sombra[peca.linha][peca.coluna] = peca.id;
@@ -762,10 +790,10 @@ bool ataque(bool jogador, char tabuleiro_real[][TAM], char tabuleiro_sombra[][TA
             mostra_tabuleiro(tabuleiro_sombra);
         } else 
         {
-            if (qtd_chances_IA <=0)
+            if (chances_IA <=0)
             {
                 TIRO_ALEATORIO = true;
-                qtd_chances_IA = 7;
+                chances_IA = 7;
                 return ataque(false, tabuleiro_real, tabuleiro_sombra);
             } else
             {
@@ -799,7 +827,7 @@ bool ataque(bool jogador, char tabuleiro_real[][TAM], char tabuleiro_sombra[][TA
                 {
                     peca_temp_IA = peca;
                     TIRO_ALEATORIO = false;
-                    qtd_chances_IA = 7;
+                    chances_IA = 7;
                 }
 
                 tabuleiro_sombra[peca.linha][peca.coluna] = peca.id;
@@ -814,39 +842,119 @@ bool ataque(bool jogador, char tabuleiro_real[][TAM], char tabuleiro_sombra[][TA
 
 void resolvedor(char tabuleiro_real[][TAM], char tabuleiro_sombra[][TAM])
 {
+    struct Peca peca;
+    int posicoes[4][2];
+
+    srand(time(NULL));
+
+    limpa_tela();
+
+    printf("+---------------+\n");
+    printf("|  RESOLVEDOR   |\n");
+    printf("+---------------+\n");
+    printf("| Acertos: %3d  |\n", conta_pecas_acertadas(tabuleiro_sombra));
+    printf("+---------------+\n");
+    printf("| Erros: %3d    |\n", conta_pecas_erradas(tabuleiro_sombra));
+    printf("+---------------+\n");
+
+    mostra_tabuleiro(tabuleiro_sombra);
+    sleep(1);
+
     if (conta_pecas_acertadas(tabuleiro_sombra) != 118)
     {
-        ataque(false, tabuleiro_real, tabuleiro_sombra);
-        printf("Acertos: %d", conta_pecas_acertadas(tabuleiro_sombra));
-        printf("Erros: %d", conta_pecas_erradas(tabuleiro_sombra));
-        sleep(1);
-        limpa_tela();
+        if (volta_posicao_inicial == 2)
+        {
+            volta_posicao_inicial = 0;
+            TIRO_ALEATORIO = true;
+        }
+        
+        if (TIRO_ALEATORIO)
+        {
+            peca.linha = rand() % TAM;
+            peca.coluna = rand() % TAM;
+            peca.id = verifica_ataque(false, tabuleiro_real, tabuleiro_sombra, peca);
 
-        return resolvedor(tabuleiro_real, tabuleiro_sombra);
-    } else printf("deu boa");
+            if((peca.linha < 0 || peca.linha > TAM-1) || (peca.coluna < 0 || peca.coluna > TAM-1)) 
+            {
+                TIRO_ALEATORIO = true;
+                return resolvedor(tabuleiro_real, tabuleiro_sombra);
+            }
+
+            if(peca.id == ' ') return resolvedor(tabuleiro_real, tabuleiro_sombra);
+            else if(peca.id == '#')
+            {
+                tabuleiro_real[peca.linha][peca.coluna] = peca.id;
+                salva_posicoes_ataque("ATAQUES_RESOLVEDOR.TXT", peca);
+
+                return resolvedor(tabuleiro_real, tabuleiro_sombra);
+            }
+
+            TIRO_ALEATORIO = false;
+            chances_IA = 0;
+            peca_temp_inicial_IA = peca;
+            peca_temp_IA = peca;
+
+            tabuleiro_sombra[peca.linha][peca.coluna] = peca_temp_IA.id;
+            salva_posicoes_ataque("ATAQUES_RESOLVEDOR.TXT", peca_temp_IA);
+
+            return resolvedor(tabuleiro_real, tabuleiro_sombra);
+        } else 
+        {
+            cria_posicoes_pecas('R', posicoes, peca_temp_IA);
+
+            if (chances_IA <= 3)
+            {
+                peca.linha = posicoes[chances_IA][0];
+                peca.coluna = posicoes[chances_IA][1];
+                peca.id = verifica_ataque(false, tabuleiro_real, tabuleiro_sombra, peca);
+
+                if (peca.id == ' ') 
+                {
+                    chances_IA++;
+
+                    return resolvedor(tabuleiro_real, tabuleiro_sombra);
+                } else if (peca.id == '#' || peca.id == '0')
+                {
+                    chances_IA++;
+
+                    tabuleiro_sombra[peca.linha][peca.coluna] = peca.id;
+                    salva_posicoes_ataque("ATAQUES_RESOLVEDOR.TXT", peca_temp_IA);
+
+                    return resolvedor(tabuleiro_real, tabuleiro_sombra);
+                } else {
+                    chances_IA  = 0;
+                    peca_temp_IA = peca;
+
+                    tabuleiro_sombra[peca.linha][peca.coluna] = peca.id;
+                    salva_posicoes_ataque("ATAQUES_RESOLVEDOR.TXT", peca_temp_IA);
+
+                    return resolvedor(tabuleiro_real, tabuleiro_sombra);
+                }
+            } else
+            {
+                chances_IA = 0;
+                volta_posicao_inicial++;
+                peca_temp_IA = peca_temp_inicial_IA;
+
+                return resolvedor(tabuleiro_real, tabuleiro_sombra);
+            }
+        }
+    } else anuncia_vencedor(false);
 }
 
 void menu_batalha(char tabuleiro_IA[][TAM],char tab_sombra_IA[][TAM], char tabuleiro_jogador[][TAM], char tab_sombra_jogador[][TAM])
 {
     int opcoes_menu_guerra, pontos_jogador, pontos_IA;
 
-    pontos_IA = conta_pecas_acertadas(tab_sombra_jogador);
-    pontos_jogador = conta_pecas_acertadas(tab_sombra_IA);
+    
 
     printf("\n==============================================\n");
     printf("||               MENU DE GUERRA             ||\n");
     printf("==============================================\n\n");
 
+    mostra_placar(tab_sombra_jogador, tab_sombra_IA);
 
-    if (pontos_IA == 30) anuncia_vencedor(false);
-    else if(pontos_jogador == 30) anuncia_vencedor(true);
-    else{
-        printf("Pontos Jogador: %d\n", pontos_jogador);
-        printf("Pontos IA: %d\n", pontos_IA);
-    }
-
-
-    printf("-- MENU --\n");
+    printf("----- OPCOES -----|\n");
     printf("1) Atacar\n2) Resolvedor\n3) Sair\n");
     scanf("%d", &opcoes_menu_guerra);
 
@@ -861,7 +969,6 @@ void menu_batalha(char tabuleiro_IA[][TAM],char tab_sombra_IA[][TAM], char tabul
         menu_batalha(tabuleiro_IA, tab_sombra_IA, tabuleiro_jogador, tab_sombra_jogador);
         break;
     case 2:
-        printf("Resolvedor bolado!\n");
         eh_resolvedor = true;
         resolvedor(tabuleiro_IA,  tab_sombra_IA);
         break;
