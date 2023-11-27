@@ -883,7 +883,7 @@ void resolvedor(char tabuleiro_real[][TAM], char tabuleiro_sombra[][TAM])
             if(peca.id == ' ') return resolvedor(tabuleiro_real, tabuleiro_sombra);
             else if(peca.id == '#')
             {
-                tabuleiro_real[peca.linha][peca.coluna] = peca.id;
+                tabuleiro_sombra[peca.linha][peca.coluna] = peca.id;
                 salva_posicoes_ataque("ATAQUES_RESOLVEDOR.TXT", peca);
 
                 return resolvedor(tabuleiro_real, tabuleiro_sombra);
@@ -944,9 +944,7 @@ void resolvedor(char tabuleiro_real[][TAM], char tabuleiro_sombra[][TAM])
 
 void menu_batalha(char tabuleiro_IA[][TAM],char tab_sombra_IA[][TAM], char tabuleiro_jogador[][TAM], char tab_sombra_jogador[][TAM])
 {
-    int opcoes_menu_guerra, pontos_jogador, pontos_IA;
-
-    
+    int opcoes_menu_guerra;
 
     printf("\n==============================================\n");
     printf("||               MENU DE GUERRA             ||\n");
@@ -954,7 +952,7 @@ void menu_batalha(char tabuleiro_IA[][TAM],char tab_sombra_IA[][TAM], char tabul
 
     mostra_placar(tab_sombra_jogador, tab_sombra_IA);
 
-    printf("----- OPCOES -----|\n");
+    printf("----- OPCOES -----\n");
     printf("1) Atacar\n2) Resolvedor\n3) Sair\n");
     scanf("%d", &opcoes_menu_guerra);
 
@@ -1010,15 +1008,16 @@ void menu_inicial(char tabuleiro_IA[][TAM], char tabuleiro_jogador[][TAM])
         //conta_pecas_tabuleiro(tabuleiro_IA);
 
         printf("\n-------------------JOGADOR------------------\n\n");
-        printf("Posicionamento automatico?\n1) Sim\n2) Nao\n");
+        printf("Deseja posicionar as pescas de maneira automatica?\n1) Sim\n2) Nao\n");
         scanf("%d", &opcao_posicionamento);
         
         inicializa_tabuleiro(tab_sombra_jogador);
         if (opcao_posicionamento == 1) 
             inicializa_player(tabuleiro_jogador, true, "./TABULEIRO_JOGADOR.TXT");
         else inicializa_player(tabuleiro_jogador, false, "./TABULEIRO_JOGADOR.TXT");
+        printf("Jogador Criado!");
         //conta_pecas_tabuleiro(tabuleiro_jogador);
-        
+        limpa_tela();
 
         menu_batalha(tabuleiro_IA, tab_sombra_IA, tabuleiro_jogador, tab_sombra_jogador);
         break;
@@ -1028,6 +1027,8 @@ void menu_inicial(char tabuleiro_IA[][TAM], char tabuleiro_jogador[][TAM])
 
         carrega_posicoes_jogadas("./ATAQUES_INIMIGO.TXT", tab_sombra_jogador);
         carrega_posicoes_jogadas("./ATAQUES_JOGADOR.TXT", tab_sombra_IA);
+
+        limpa_tela();
 
         menu_batalha(tabuleiro_IA, tab_sombra_IA, tabuleiro_jogador, tab_sombra_jogador);
         break;
